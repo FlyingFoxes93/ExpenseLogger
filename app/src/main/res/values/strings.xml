@@ -5,7 +5,7 @@
     <!-- UI Strings -->
     <string name="take_receipt_photo">Take Receipt Photo</string>
     <string name="enter_amount">Enter amount</string>
-    <string name="total_amount">Total Amount: $0.00</string>
+    <string name="total_amount">Total Amount: £0.00</string>
     <string name="total_amount_label">Total Amount: %1$s%2$.2f</string>
     <string name="amount_label">Amount: %1$s%2$.2f</string>
     <string name="timestamp">Timestamp</string>
