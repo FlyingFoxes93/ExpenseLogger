@@ -10,6 +10,7 @@
     <string name="amount_label">Amount: $%.2f</string>
     <string name="timestamp">Timestamp</string>
     <string name="receipt">Receipt</string>
+    <string name="share_expenses">Share Expenses</string>
 
     <!-- Error and Status Messages -->
     <string name="no_camera_app">No camera app found</string>
@@ -23,4 +24,12 @@
     <string name="timestamp_format">yyyy-MM-dd HH:mm:ss</string>
     <string name="image_file_prefix">receipt_%1$d.jpg</string>
     <string name="delete">Delete</string>
+
+    <string name="no_expenses_to_share">No expenses to share</string>
+    <string name="expense_report_subject">Expense Report</string>
+    <string name="send_email">Send Email</string>
+    <string name="no_email_clients">No email clients installed</string>
+    <string name="expense_report_header">Expense Report</string>
+    <string name="amount">Amount</string>
+    <string name="no_receipts">No receipts to display</string>
 </resources>

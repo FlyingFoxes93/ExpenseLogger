@@ -11,6 +11,14 @@
         android:layout_height="wrap_content"
         android:text="@string/take_receipt_photo" />
 
+    <Button
+        android:id="@+id/btnShareExpenses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/share_expenses"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center_horizontal"/>
+
     <EditText
         android:id="@+id/etAmount"
         android:layout_width="match_parent"
@@ -34,5 +42,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"/>
+
+    <!-- Empty View -->
+    <TextView
+        android:id="@+id/tvEmptyMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_receipts"
+        android:textSize="16sp"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
 
 </LinearLayout>

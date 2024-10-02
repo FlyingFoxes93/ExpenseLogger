@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -12,6 +13,8 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -35,6 +38,8 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener {
     private val receipts = mutableListOf<Receipt>()
     private lateinit var receiptsAdapter: ReceiptsAdapter
     private var totalAmount = 0.0
+    private lateinit var btnShareExpenses: Button
+    private lateinit var tvEmptyMessage: TextView
 
     private lateinit var currentPhotoPath: String
     private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
@@ -47,6 +52,8 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener {
         etAmount = findViewById(R.id.etAmount)
         tvTotalAmount = findViewById(R.id.tvTotalAmount)
         rvReceipts = findViewById(R.id.rvReceipts)
+        btnShareExpenses = findViewById(R.id.btnShareExpenses)
+        tvEmptyMessage = findViewById(R.id.tvEmptyMessage)
 
         receiptsAdapter = ReceiptsAdapter(receipts, this)
         rvReceipts.layoutManager = LinearLayoutManager(this)
@@ -59,6 +66,7 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener {
             } else {
                 Toast.makeText(this, getString(R.string.photo_capture_failed), Toast.LENGTH_SHORT).show()
             }
+            updateEmptyView()
         }
 
         // Check and request camera permission
@@ -79,6 +87,9 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener {
                     REQUEST_CAMERA_PERMISSION)
             }
         }
+        btnShareExpenses.setOnClickListener {
+            shareExpenses()
+        }
     }
 
     private fun dispatchTakePictureIntent() {
@@ -96,6 +107,63 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener {
             )
             takePictureLauncher.launch(photoURI)
         }
+    }
+
+    private fun shareExpenses() {
+        if (receipts.isEmpty()) {
+            Toast.makeText(this, getString(R.string.no_expenses_to_share), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Format the expense data
+        val expenseData = formatExpenseData()
+
+        // Collect image URIs
+        val imageUris = ArrayList<Uri>()
+        receipts.forEach { receipt ->
+            val file = File(receipt.imageUri)
+            val uri = FileProvider.getUriForFile(
+                this,
+                "${packageName}.fileprovider",
+                file
+            )
+            imageUris.add(uri)
+        }
+
+        // Create an email intent
+        val emailIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            type = "message/rfc822"
+            putExtra(Intent.EXTRA_SUBJECT, getString(R.string.expense_report_subject))
+            putExtra(Intent.EXTRA_TEXT, expenseData)
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        // Launch the email intent
+        try {
+            startActivity(Intent.createChooser(emailIntent, getString(R.string.send_email)))
+        } catch (ex: ActivityNotFoundException) {
+            Toast.makeText(this, getString(R.string.no_email_clients), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun formatExpenseData(): String {
+        val builder = StringBuilder()
+        builder.append(getString(R.string.expense_report_header))
+        builder.append("\n\n")
+
+        var totalAmount = 0.0
+
+        receipts.forEach { receipt ->
+            builder.append("${getString(R.string.amount)}: $${String.format("%.2f", receipt.amount)}\n")
+            builder.append("${getString(R.string.timestamp)}: ${receipt.timestamp}\n")
+            builder.append("\n")
+            totalAmount += receipt.amount
+        }
+
+        builder.append("${getString(R.string.total_amount)}: $${String.format("%.2f", totalAmount)}\n")
+
+        return builder.toString()
     }
 
     private fun handleImageCapture() {
@@ -118,6 +186,18 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener {
 
         // Clear the amount input
         etAmount.text.clear()
+
+        updateEmptyView()
+    }
+
+    private fun updateEmptyView() {
+        if (receipts.isEmpty()) {
+            rvReceipts.visibility = View.GONE
+            tvEmptyMessage.visibility = View.VISIBLE
+        } else {
+            rvReceipts.visibility = View.VISIBLE
+            tvEmptyMessage.visibility = View.GONE
+        }
     }
 
     @Throws(IOException::class)
@@ -153,14 +233,11 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener {
         // Notify the adapter
         receiptsAdapter.notifyItemRemoved(position)
 
-        // Check if the list is empty
-        if (receipts.isEmpty()) {
-            // Optionally, you can reset the adapter or update the UI
-            // For example, you might want to display a message indicating the list is empty
-        }
-
         // Update the total amount
         totalAmount -= receipt.amount
         tvTotalAmount.text = getString(R.string.total_amount_label, totalAmount)
+
+        // Update the empty view
+        updateEmptyView()
     }
 }

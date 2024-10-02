@@ -33,18 +33,21 @@ class ReceiptsAdapter(
 
     override fun onBindViewHolder(holder: ReceiptViewHolder, position: Int) {
         val receipt = receipts[position]
-        holder.tvAmount.text =
-            holder.itemView.context.getString(R.string.amount_label, receipt.amount)
+        holder.tvAmount.text = holder.itemView.context.getString(R.string.amount_label, receipt.amount)
         holder.tvTimestamp.text = receipt.timestamp
 
-        // Load the image using Glide or any image loading library
+        // Load the image
         Glide.with(holder.itemView.context)
             .load(receipt.imageUri)
             .into(holder.ivReceipt)
 
         // Set onClickListener for delete button
         holder.btnDelete.setOnClickListener {
-            deleteListener.onReceiptDelete(receipt, position)
+            val currentPosition = holder.bindingAdapterPosition
+            if (currentPosition != RecyclerView.NO_POSITION) {
+                val currentReceipt = receipts[currentPosition]
+                deleteListener.onReceiptDelete(currentReceipt, currentPosition)
+            }
         }
     }
 
