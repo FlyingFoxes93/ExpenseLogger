@@ -8,5 +8,4 @@
         android:id="@+id/nav_settings"
         android:title="@string/settings"
         android:icon="@drawable/ic_settings" />
-    <!-- Add more menu items as needed -->
 </menu>

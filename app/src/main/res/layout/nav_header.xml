@@ -4,21 +4,18 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!-- Search Bar -->
     <androidx.appcompat.widget.SearchView
         android:id="@+id/searchActivities"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:queryHint="Search Activities" />
 
-    <!-- Add Activity Button -->
     <Button
         android:id="@+id/btnAddActivity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Activity" />
+        android:text="@string/add_activity" />
 
-    <!-- Activities List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvActivities"
         android:layout_width="match_parent"

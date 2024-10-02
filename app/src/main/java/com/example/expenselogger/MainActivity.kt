@@ -113,7 +113,6 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
 
         drawerToggle.drawerArrowDrawable.color = ContextCompat.getColor(this, R.color.fuchsia)
 
-        // Initialize the ActivityResultLauncher
         takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success) {
                 handleImageCapture()
@@ -135,7 +134,6 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
             }
         })
 
-        // Check and request camera permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -181,10 +179,8 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
             return
         }
 
-        // Format the expense data
         val expenseData = formatExpenseData()
 
-        // Collect image URIs
         val imageUris = ArrayList<Uri>()
         receipts.forEach { receipt ->
             val file = File(receipt.imageUri)
@@ -196,7 +192,6 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
             imageUris.add(uri)
         }
 
-        // Create an email intent
         val emailIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
             type = "message/rfc822"
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.expense_report_subject))
@@ -205,7 +200,6 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
-        // Launch the email intent
         try {
             startActivity(Intent.createChooser(emailIntent, getString(R.string.send_email)))
         } catch (ex: ActivityNotFoundException) {
