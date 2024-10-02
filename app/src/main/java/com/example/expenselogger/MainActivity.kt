@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         setSupportActionBar(toolbar)
 
         supportActionBar?.setDisplayShowTitleEnabled(false)
+        toolbar.navigationIcon?.setTint(ContextCompat.getColor(this, R.color.fuchsia))
 
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
