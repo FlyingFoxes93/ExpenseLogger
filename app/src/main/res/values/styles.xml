@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Existing styles -->
+
+    <!-- Custom Button Style -->
+    <style name="FuchsiaButton" parent="Widget.AppCompat.Button">
+        <item name="android:backgroundTint">@color/fuchsia</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+</resources>
