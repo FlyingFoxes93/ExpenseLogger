@@ -111,6 +111,8 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         drawerLayout.addDrawerListener(drawerToggle)
         drawerToggle.syncState()
 
+        drawerToggle.drawerArrowDrawable.color = ContextCompat.getColor(this, R.color.fuchsia)
+
         // Initialize the ActivityResultLauncher
         takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success) {
