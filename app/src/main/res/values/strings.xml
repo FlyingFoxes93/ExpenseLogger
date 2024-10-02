@@ -32,4 +32,7 @@
     <string name="expense_report_header">Expense Report</string>
     <string name="amount">Amount</string>
     <string name="no_receipts">No receipts to display</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

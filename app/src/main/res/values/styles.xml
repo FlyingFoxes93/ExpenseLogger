@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Existing styles -->
-
     <!-- Custom Button Style -->
     <style name="FuchsiaButton" parent="Widget.AppCompat.Button">
         <item name="android:background">@drawable/button_background</item>

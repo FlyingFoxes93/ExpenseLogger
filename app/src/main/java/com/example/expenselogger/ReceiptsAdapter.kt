@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.expenselogger.models.ActivityItem
 
 interface OnReceiptDeleteListener {
     fun onReceiptDelete(receipt: Receipt, position: Int)
@@ -15,6 +16,7 @@ interface OnReceiptDeleteListener {
 
 class ReceiptsAdapter(
     private val receipts: MutableList<Receipt>,
+    private val activitiesList: List<ActivityItem>,
     private val deleteListener: OnReceiptDeleteListener
 ) : RecyclerView.Adapter<ReceiptsAdapter.ReceiptViewHolder>() {
 
@@ -22,6 +24,7 @@ class ReceiptsAdapter(
         val ivReceipt: ImageView = itemView.findViewById(R.id.ivReceipt)
         val tvAmount: TextView = itemView.findViewById(R.id.tvAmount)
         val tvTimestamp: TextView = itemView.findViewById(R.id.tvTimestamp)
+        val tvActivityName: TextView = itemView.findViewById(R.id.tvActivityName)
         val btnDelete: ImageButton = itemView.findViewById(R.id.btnDelete)
     }
 
@@ -41,6 +44,9 @@ class ReceiptsAdapter(
             .load(receipt.imageUri)
             .into(holder.ivReceipt)
 
+        val activityName = getActivityNameById(receipt.activityId)
+        holder.tvActivityName.text = activityName
+
         // Set onClickListener for delete button
         holder.btnDelete.setOnClickListener {
             val currentPosition = holder.bindingAdapterPosition
@@ -49,6 +55,10 @@ class ReceiptsAdapter(
                 deleteListener.onReceiptDelete(currentReceipt, currentPosition)
             }
         }
+    }
+
+    private fun getActivityNameById(activityId: Int): String {
+        return activitiesList.find { it.id == activityId }?.name ?: "No Activity"
     }
 
     override fun getItemCount() = receipts.size

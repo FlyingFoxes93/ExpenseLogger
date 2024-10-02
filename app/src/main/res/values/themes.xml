@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.ExpenseLogger" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.ExpenseLogger" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryDark">@color/purple_700</item>
+        <item name="colorAccent">@color/teal_200</item>
+        <item name="windowActionBar">false</item> <!-- Ensure this is set to false -->
+        <item name="windowNoTitle">true</item> <!-- Ensure this is set to true -->
+    </style>
+
 </resources>
