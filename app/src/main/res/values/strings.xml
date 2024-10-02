@@ -1,6 +1,6 @@
 <resources>
     <!-- App Name -->
-    <string name="app_name">ExpenseLogger</string>
+    <string name="app_name">MOD Expenses Tracker</string>
 
     <!-- UI Strings -->
     <string name="take_receipt_photo">Take Receipt Photo</string>
