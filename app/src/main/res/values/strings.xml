@@ -6,11 +6,12 @@
     <string name="take_receipt_photo">Take Receipt Photo</string>
     <string name="enter_amount">Enter amount</string>
     <string name="total_amount">Total Amount: $0.00</string>
-    <string name="total_amount_label">Total Amount: $%.2f</string>
-    <string name="amount_label">Amount: $%.2f</string>
+    <string name="total_amount_label">Total Amount: %1$s%2$.2f</string>
+    <string name="amount_label">Amount: %1$s%2$.2f</string>
     <string name="timestamp">Timestamp</string>
     <string name="receipt">Receipt</string>
     <string name="share_expenses">Share Expenses</string>
+    <string name="currency_symbol">£</string>
 
     <!-- Error and Status Messages -->
     <string name="no_camera_app">No camera app found</string>
@@ -35,4 +36,7 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="no_activity_selected">No activity selected</string>
+    <string name="home">Home</string>
+    <string name="settings">Settings</string>
 </resources>

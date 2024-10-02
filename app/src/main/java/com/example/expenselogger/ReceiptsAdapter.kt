@@ -36,11 +36,15 @@ class ReceiptsAdapter(
 
     override fun onBindViewHolder(holder: ReceiptViewHolder, position: Int) {
         val receipt = receipts[position]
-        holder.tvAmount.text = holder.itemView.context.getString(R.string.amount_label, receipt.amount)
+        val context = holder.itemView.context
+        val currencySymbol = context.getString(R.string.currency_symbol)
+        val amountText = context.getString(R.string.amount_label, currencySymbol, receipt.amount)
+
+        holder.tvAmount.text = amountText
         holder.tvTimestamp.text = receipt.timestamp
 
         // Load the image
-        Glide.with(holder.itemView.context)
+        Glide.with(context)
             .load(receipt.imageUri)
             .into(holder.ivReceipt)
 

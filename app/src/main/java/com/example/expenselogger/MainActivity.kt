@@ -81,6 +81,8 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
         drawerLayout = findViewById(R.id.drawerLayout)
         navigationView = findViewById(R.id.navigationView)
 
@@ -213,16 +215,19 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         builder.append(getString(R.string.expense_report_header))
         builder.append("\n\n")
 
+        val currencySymbol = getString(R.string.currency_symbol)
+
         var totalAmount = 0.0
 
         receipts.forEach { receipt ->
-            builder.append("${getString(R.string.amount)}: $${String.format("%.2f", receipt.amount)}\n")
+            builder.append(getString(R.string.amount_label, currencySymbol, receipt.amount))
+            builder.append("\n")
             builder.append("${getString(R.string.timestamp)}: ${receipt.timestamp}\n")
             builder.append("\n")
             totalAmount += receipt.amount
         }
 
-        builder.append("${getString(R.string.total_amount)}: $${String.format("%.2f", totalAmount)}\n")
+        builder.append(getString(R.string.total_amount_label, currencySymbol, totalAmount))
 
         return builder.toString()
     }
@@ -230,8 +235,9 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
     private fun handleImageCapture() {
         val amountText = etAmount.text.toString()
         val amount = amountText.toDoubleOrNull() ?: 0.0
+        val currencySymbol = getString(R.string.currency_symbol)
 
-        val timeStamp: String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
+        val timeStamp: String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK).format(Date())
 
         val activityId = selectedActivity?.id ?: -1
 
@@ -246,7 +252,7 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
 
         // Update total amount
         totalAmount += amount
-        tvTotalAmount.text = getString(R.string.total_amount_label, totalAmount)
+        tvTotalAmount.text = getString(R.string.total_amount_label, currencySymbol, totalAmount)
 
         // Clear the amount input
         etAmount.text.clear()
@@ -335,6 +341,8 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         }
     }
     override fun onReceiptDelete(receipt: Receipt, position: Int) {
+
+        val currencySymbol = getString(R.string.currency_symbol)
         // Remove the receipt from the list
         receipts.removeAt(position)
 
@@ -343,7 +351,7 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
 
         // Update the total amount
         totalAmount -= receipt.amount
-        tvTotalAmount.text = getString(R.string.total_amount_label, totalAmount)
+        tvTotalAmount.text = getString(R.string.total_amount_label, currencySymbol, totalAmount)
 
         // Update the empty view
         updateEmptyView()

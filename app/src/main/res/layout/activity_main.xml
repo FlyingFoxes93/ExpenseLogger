@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <!-- Main Content -->
     <LinearLayout
@@ -12,25 +13,32 @@
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:layout_height="match_parent"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:fitsSystemWindows="true">
 
+        <!-- Toolbar with Centered Title -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_height="?attr/actionBarSize"
             android:layout_width="match_parent"
-            android:background="@color/fuchsia"
             android:title="@string/app_name"
-            android:titleTextColor="@android:color/white" />
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-        <TextView
-            android:id="@+id/tvSelectedActivity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="No activity selected"
-            android:textSize="16sp"
-            android:layout_marginTop="8dp"
-            android:padding="8dp"/>
+            <!-- Centered Title -->
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:text="@string/app_name"
+                android:textColor="@color/fuchsia"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </androidx.appcompat.widget.Toolbar>
 
+        <!-- Take Photo Button -->
         <Button
             android:id="@+id/btnTakePhoto"
             style="@style/FuchsiaButton"
@@ -41,6 +49,7 @@
             android:text="@string/take_receipt_photo"
             android:layout_gravity="center_horizontal" />
 
+        <!-- Share Expenses Button -->
         <Button
             android:id="@+id/btnShareExpenses"
             style="@style/FuchsiaButton"
@@ -52,9 +61,21 @@
             android:layout_marginTop="16dp"
             android:layout_gravity="center_horizontal" />
 
+        <!-- Selected Activity TextView -->
+        <TextView
+            android:id="@+id/tvSelectedActivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_activity_selected"
+            android:textSize="16sp"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"/>
+
+        <!-- Amount Input EditText -->
         <EditText
             android:id="@+id/etAmount"
             android:layout_width="wrap_content"
+            android:autofillHints=""
             android:minWidth="200dp"
             android:maxWidth="300dp"
             android:layout_height="wrap_content"
@@ -62,20 +83,23 @@
             android:hint="@string/enter_amount"
             android:inputType="numberDecimal"
             android:minHeight="48dp"
-            android:layout_gravity="left" />
+            android:layout_gravity="start" />
 
+        <!-- Total Amount TextView -->
         <TextView
             android:id="@+id/tvTotalAmount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/total_amount"
+            android:text="@string/total_amount_label"
             android:textSize="18sp"
             android:layout_marginTop="8dp" />
 
+        <!-- Receipts RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvReceipts"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:layout_marginTop="16dp" />
 
         <!-- Empty View -->
@@ -93,10 +117,12 @@
     <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:headerLayout="@layout/nav_header">
+        android:layout_width="280dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:fitsSystemWindows="true"
+    app:headerLayout="@layout/nav_header"
+    app:menu="@menu/drawer_menu">
     </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>
