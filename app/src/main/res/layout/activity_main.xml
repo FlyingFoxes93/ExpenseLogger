@@ -9,6 +9,8 @@
         android:id="@+id/btnTakePhoto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/fuchsia"
+        android:textColor="@android:color/white"
         android:text="@string/take_receipt_photo" />
 
     <Button
@@ -16,6 +18,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/share_expenses"
+        android:backgroundTint="@color/fuchsia"
+        android:textColor="@android:color/white"
         android:layout_marginTop="16dp"
         android:layout_gravity="center_horizontal"/>
 
