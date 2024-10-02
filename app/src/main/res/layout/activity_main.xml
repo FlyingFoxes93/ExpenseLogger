@@ -8,14 +8,19 @@
     <Button
         android:id="@+id/btnTakePhoto"
         style="@style/FuchsiaButton"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
+        android:minWidth="280dp"
+        android:maxWidth="300dp"
         android:layout_height="wrap_content"
-        android:text="@string/take_receipt_photo" />
+        android:text="@string/take_receipt_photo"
+        android:layout_gravity="center_horizontal" />
 
     <Button
         android:id="@+id/btnShareExpenses"
         style="@style/FuchsiaButton"
         android:layout_width="wrap_content"
+        android:minWidth="200dp"
+        android:maxWidth="300dp"
         android:layout_height="wrap_content"
         android:text="@string/share_expenses"
         android:layout_marginTop="16dp"
@@ -24,12 +29,15 @@
     <EditText
         android:id="@+id/etAmount"
         android:layout_width="match_parent"
+        android:minWidth="200dp"
+        android:maxWidth="300dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:autofillHints=""
         android:hint="@string/enter_amount"
         android:inputType="numberDecimal"
-        android:minHeight="48dp" />
+        android:minHeight="48dp"
+        android:layout_gravity="center_horizontal" />
 
     <TextView
         android:id="@+id/tvTotalAmount"
