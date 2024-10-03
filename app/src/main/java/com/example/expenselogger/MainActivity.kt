@@ -160,7 +160,7 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         // Set Click Listener for Take Photo Button
         btnTakePhoto.setOnClickListener {
             if (selectedActivity == null) {
-                Toast.makeText(this, "Please select an activity before taking a photo.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please select an activity in the sidebar before taking a photo.", Toast.LENGTH_SHORT).show()
             } else {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     == PackageManager.PERMISSION_GRANTED) {
