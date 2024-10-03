@@ -17,8 +17,8 @@ import android.app.AlertDialog
 import android.text.InputType
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         rvActivities.layoutManager = LinearLayoutManager(this)
         rvActivities.adapter = activitiesAdapter
 
-        // Initialize ReceiptsAdapter
+        // Initialize ReceiptsAdapter with corrected constructor
         receiptsAdapter = ReceiptsAdapter(activitiesList, this)
         rvReceipts.layoutManager = LinearLayoutManager(this)
         rvReceipts.adapter = receiptsAdapter
@@ -202,12 +202,7 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
 
         val imageUris = ArrayList<Uri>()
         filteredReceipts.forEach { receipt ->
-            val file = File(receipt.imageUri)
-            val uri = FileProvider.getUriForFile(
-                this,
-                "${packageName}.fileprovider",
-                file
-            )
+            val uri = Uri.parse(receipt.imageUri)
             imageUris.add(uri)
         }
 
@@ -257,9 +252,13 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
 
         val activityId = selectedActivity?.id ?: 0
 
+        // Generate content URI using FileProvider
+        val photoFile = File(currentPhotoPath)
+        val receiptUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", photoFile).toString()
+
         val receipt = Receipt(
             id = ++receiptIdCounter,
-            imageUri = currentPhotoPath,
+            imageUri = receiptUri, // Store as content URI string
             amount = amount,
             timestamp = timeStamp,
             activityId = activityId
@@ -268,7 +267,7 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
 
         if (selectedActivity != null && receipt.activityId == selectedActivity!!.id) {
             filteredReceipts.add(receipt)
-            receiptsAdapter.updateReceipts(filteredReceipts)
+            receiptsAdapter.addReceipt(receipt)
 
             // Update total amount
             totalAmount += amount
@@ -342,7 +341,7 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         // Initially, display all receipts
         filteredReceipts.clear()
         filteredReceipts.addAll(receipts)
-        receiptsAdapter.updateReceipts(filteredReceipts)
+        receiptsAdapter.filterByActivity(null)
 
         // Update total amount
         updateTotalAmount()
@@ -358,9 +357,9 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
     private fun filterReceiptsByActivity(activityId: Int) {
         filteredReceipts.clear()
         filteredReceipts.addAll(receipts.filter { it.activityId == activityId })
-        receiptsAdapter.updateReceipts(filteredReceipts)
+        receiptsAdapter.filterByActivity(activityId)
 
-        // Update total amount for the selected activity
+        // Update total amount
         updateTotalAmount()
 
         // Update the empty view
@@ -397,15 +396,14 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         receipts.remove(receipt)
 
         // Remove the receipt from the filtered list if present
-        val removed = filteredReceipts.remove(receipt)
-        if (removed) {
-            // Notify the adapter about the removal
-            receiptsAdapter.updateReceipts(filteredReceipts)
+        filteredReceipts.remove(receipt)
 
-            // Update total amount
-            totalAmount -= receipt.amount
-            tvTotalAmount.text = getString(R.string.total_amount_label, currencySymbol, totalAmount)
-        }
+        // Remove from adapter
+        receiptsAdapter.removeReceipt(receipt)
+
+        // Update total amount
+        totalAmount -= receipt.amount
+        tvTotalAmount.text = getString(R.string.total_amount_label, currencySymbol, totalAmount)
 
         // Update the empty view
         updateEmptyView()
