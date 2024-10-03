@@ -457,9 +457,25 @@ class MainActivity : AppCompatActivity(),
         receipts.filter { it.activityId == activity.id }
             .forEach { it.activityId = DEFAULT_ACTIVITY_ID }
 
-        // Refresh receipts display
-        receiptsAdapter.updateReceipts(filteredReceipts)
-        updateTotalAmount()
+        // If the deleted activity was selected, reset to default activity
+        if (selectedActivity?.id == activity.id) {
+            selectedActivity = activitiesList.find { it.id == DEFAULT_ACTIVITY_ID }
+            if (selectedActivity != null) {
+                tvSelectedActivity.text = getString(R.string.activity, selectedActivity!!.name)
+                Toast.makeText(this, "Activity deleted. Default activity selected.", Toast.LENGTH_SHORT).show()
+                filterReceiptsByActivity(selectedActivity!!.id)
+            } else {
+                // Handle case where default activity is not present
+                selectedActivity = null
+                tvSelectedActivity.text = getString(R.string.activity, "Uncategorized")
+                filterReceiptsByActivity(DEFAULT_ACTIVITY_ID)
+            }
+        } else {
+            // Refresh receipts display
+            receiptsAdapter.updateReceipts(filteredReceipts)
+            updateTotalAmount()
+        }
+
         Toast.makeText(this, "Activity deleted successfully.", Toast.LENGTH_SHORT).show()
     }
 }
