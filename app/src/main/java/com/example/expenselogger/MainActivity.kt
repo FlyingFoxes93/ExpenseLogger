@@ -419,7 +419,7 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         // Handle the activity selection
         selectedActivity = activity
         drawerLayout.closeDrawers()
-        tvSelectedActivity.text = "Activity: ${activity.name}"
+        tvSelectedActivity.text = getString(R.string.activity, activity.name)
         Toast.makeText(this, "Selected: ${activity.name}", Toast.LENGTH_SHORT).show()
         filterReceiptsByActivity(activity.id)
     }

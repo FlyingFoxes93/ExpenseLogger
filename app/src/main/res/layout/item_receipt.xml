@@ -35,7 +35,7 @@
                 android:id="@+id/tvAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Amount: £0.00"
+                android:text="@string/amount_0_00"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -43,7 +43,7 @@
                 android:id="@+id/tvTimestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Timestamp: 2023-10-02 12:34:56"
+                android:text="@string/timestamp_2023_10_02_12_34_56"
                 android:textSize="14sp"
                 android:textColor="#666" />
 
@@ -51,7 +51,7 @@
                 android:id="@+id/tvActivityName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Activity: Work"
+                android:text="@string/activity_work"
                 android:textSize="14sp"
                 android:textColor="#666" />
         </LinearLayout>
