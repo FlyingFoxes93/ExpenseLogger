@@ -11,6 +11,7 @@ import android.os.Environment
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import android.app.AlertDialog
@@ -34,10 +35,14 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAdapter.OnActivityClickListener {
+class MainActivity : AppCompatActivity(),
+    OnReceiptDeleteListener,
+    ActivitiesAdapter.OnActivityClickListener,
+    ActivitiesAdapter.OnActivityDeleteListener { // Implement OnActivityDeleteListener
 
     companion object {
         private const val REQUEST_CAMERA_PERMISSION = 100
+        const val DEFAULT_ACTIVITY_ID = 0
     }
 
     private lateinit var btnTakePhoto: Button
@@ -109,8 +114,8 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         val btnAddActivity = headerView.findViewById<Button>(R.id.btnAddActivity)
         rvActivities = headerView.findViewById(R.id.rvActivities)
 
-        // Initialize ActivitiesAdapter
-        activitiesAdapter = ActivitiesAdapter(activitiesList, this)
+        // Initialize ActivitiesAdapter with deletion listener
+        activitiesAdapter = ActivitiesAdapter(activitiesList, this, this) // Pass 'this' for both listeners
         rvActivities.layoutManager = LinearLayoutManager(this)
         rvActivities.adapter = activitiesAdapter
 
@@ -152,9 +157,11 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         // Check and request camera permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
+            ActivityCompat.requestPermissions(
+                this,
                 arrayOf(Manifest.permission.CAMERA),
-                REQUEST_CAMERA_PERMISSION)
+                REQUEST_CAMERA_PERMISSION
+            )
         }
 
         // Set Click Listener for Take Photo Button
@@ -256,7 +263,7 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
 
         val timeStamp: String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK).format(Date())
 
-        val activityId = selectedActivity?.id ?: 0
+        val activityId = selectedActivity?.id ?: DEFAULT_ACTIVITY_ID
 
         // Generate content URI using FileProvider
         val photoFile = File(currentPhotoPath)
@@ -309,7 +316,10 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
     }
 
     private fun loadActivities() {
-        // Add some dummy activities or load from a database
+        // Add default activity
+        activitiesList.add(ActivityItem(DEFAULT_ACTIVITY_ID, "Uncategorised"))
+
+        // Add other activities
         activitiesList.add(ActivityItem(1, "Work"))
         activitiesList.add(ActivityItem(2, "Personal"))
         activitiesAdapter.notifyDataSetChanged()
@@ -337,10 +347,10 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
     }
 
     private fun addNewActivity(name: String) {
-        val newId = (activitiesList.maxByOrNull { it.id }?.id ?: 0) + 1
+        val newId = (activitiesList.maxByOrNull { it.id }?.id ?: DEFAULT_ACTIVITY_ID) + 1
         val newActivity = ActivityItem(newId, name)
         activitiesList.add(newActivity)
-        activitiesAdapter.notifyDataSetChanged()
+        activitiesAdapter.notifyItemInserted(activitiesList.size - 1)
     }
 
     private fun loadReceipts() {
@@ -396,6 +406,18 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
     }
 
     override fun onReceiptDelete(receipt: Receipt) {
+        // Show confirmation dialog
+        AlertDialog.Builder(this)
+            .setTitle("Delete Receipt")
+            .setMessage("Are you sure you want to delete this receipt?")
+            .setPositiveButton("Yes") { _, _ ->
+                deleteReceipt(receipt)
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
+
+    private fun deleteReceipt(receipt: Receipt) {
         val currencySymbol = getString(R.string.currency_symbol)
 
         // Remove the receipt from the master list
@@ -413,6 +435,8 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
 
         // Update the empty view
         updateEmptyView()
+
+        Toast.makeText(this, "Receipt deleted successfully.", Toast.LENGTH_SHORT).show()
     }
 
     override fun onActivitySelected(activity: ActivityItem) {
@@ -422,5 +446,20 @@ class MainActivity : AppCompatActivity(), OnReceiptDeleteListener, ActivitiesAda
         tvSelectedActivity.text = getString(R.string.activity, activity.name)
         Toast.makeText(this, "Selected: ${activity.name}", Toast.LENGTH_SHORT).show()
         filterReceiptsByActivity(activity.id)
+    }
+
+    override fun onActivityDelete(activity: ActivityItem) {
+        // Remove the activity from the list
+        activitiesList.remove(activity)
+        activitiesAdapter.notifyDataSetChanged()
+
+        // Reassign receipts to default activity
+        receipts.filter { it.activityId == activity.id }
+            .forEach { it.activityId = DEFAULT_ACTIVITY_ID }
+
+        // Refresh receipts display
+        receiptsAdapter.updateReceipts(filteredReceipts)
+        updateTotalAmount()
+        Toast.makeText(this, "Activity deleted successfully.", Toast.LENGTH_SHORT).show()
     }
 }

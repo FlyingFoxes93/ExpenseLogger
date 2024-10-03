@@ -38,7 +38,8 @@
     <string name="add_activity">Add Activity</string>
     <string name="receipt_image_desc">receipt image</string>
     <string name="amount_0_00">Amount: £0.00</string>
-    <string name="timestamp_2023_10_02_12_34_56">Timestamp: 2023-10-02 12:34:56</string>
+    <string name="timestamp_2023_10_02_12_34_56">Timestamp: 2023–10–02 12:34:56</string>
     <string name="activity_work">Activity: Work</string>
     <string name="activity">Activity: %1$s</string>
+    <string name="delete_activity">delete_activity</string>
 </resources>
