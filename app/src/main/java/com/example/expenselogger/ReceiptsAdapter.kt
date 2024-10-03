@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.expenselogger.models.ActivityItem
+import com.example.expenselogger.Receipt
 
 interface OnReceiptDeleteListener {
     fun onReceiptDelete(receipt: Receipt)
@@ -26,6 +27,9 @@ class ReceiptsAdapter(
 
     // Filtered list to display
     private val filteredReceipts: MutableList<Receipt> = mutableListOf()
+
+    // Current filter
+    private var currentFilterActivityId: Int? = null
 
     class ReceiptViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val ivReceipt: ImageView = itemView.findViewById(R.id.ivReceipt)
@@ -52,9 +56,9 @@ class ReceiptsAdapter(
 
         // Load the image using Glide with a placeholder and error image
         Glide.with(context)
-            .load(Uri.parse(receipt.imageUri)) // Ensure imageUri is a valid content URI string
-            .placeholder(R.drawable.ic_receipt_placeholder) // Add a placeholder image in drawable
-            .error(R.drawable.ic_receipt_placeholder) // Add an error image in drawable
+            .load(Uri.parse(receipt.imageUri))
+            .placeholder(R.drawable.ic_receipt_placeholder)
+            .error(R.drawable.ic_receipt_placeholder)
             .into(holder.ivReceipt)
 
         val activityName = getActivityNameById(receipt.activityId)
@@ -72,11 +76,34 @@ class ReceiptsAdapter(
 
     override fun getItemCount() = filteredReceipts.size
 
-    // Method to add a receipt
-    fun addReceipt(receipt: Receipt) {
-        allReceipts.add(receipt)
-        filteredReceipts.add(receipt)
-        notifyItemInserted(filteredReceipts.size - 1)
+    // Method to set/update the entire receipts list
+    fun setReceipts(newReceipts: List<Receipt>) {
+        allReceipts.clear()
+        allReceipts.addAll(newReceipts)
+        applyFilter()
+    }
+
+    // Method to filter receipts by activity
+    fun filterByActivity(activityId: Int?) {
+        currentFilterActivityId = activityId
+        applyFilter()
+    }
+
+    private fun applyFilter() {
+        filteredReceipts.clear()
+        if (currentFilterActivityId == null) {
+            // No filter applied, show all receipts
+            filteredReceipts.addAll(allReceipts)
+        } else {
+            // Filter receipts matching the activityId
+            filteredReceipts.addAll(allReceipts.filter { it.activityId == currentFilterActivityId })
+        }
+        notifyDataSetChanged()
+    }
+
+    // Getter to retrieve the currently filtered receipts
+    fun getFilteredReceipts(): List<Receipt> {
+        return filteredReceipts.toList()
     }
 
     // Method to remove a receipt
@@ -89,50 +116,12 @@ class ReceiptsAdapter(
         allReceipts.remove(receipt)
     }
 
-    // Method to filter receipts by activity
-    fun filterByActivity(activityId: Int?) {
-        filteredReceipts.clear()
-        if (activityId == null) {
-            // No filter applied, show all receipts
-            filteredReceipts.addAll(allReceipts)
-        } else {
-            // Filter receipts matching the activityId
-            filteredReceipts.addAll(allReceipts.filter { it.activityId == activityId })
+    // Method to add a receipt
+    fun addReceipt(receipt: Receipt) {
+        allReceipts.add(receipt)
+        if (currentFilterActivityId == null || receipt.activityId == currentFilterActivityId) {
+            filteredReceipts.add(receipt)
+            notifyItemInserted(filteredReceipts.size - 1)
         }
-        notifyDataSetChanged()
-    }
-
-    // Optional: Method to clear filters
-    fun clearFilter() {
-        filterByActivity(null)
-    }
-
-    // Method to update the entire receipts list
-    fun updateReceipts(newReceipts: List<Receipt>) {
-        allReceipts.clear()
-        allReceipts.addAll(newReceipts)
-
-        // Apply current filter
-        if (currentFilterActivityId != null) {
-            filterByActivity(currentFilterActivityId)
-        } else {
-            filterByActivity(null)
-        }
-    }
-
-    private var currentFilterActivityId: Int? = null
-
-    // Override filterByActivity to keep track of current filter
-    fun filterByActivity(activityId: Int?, notify: Boolean = true) {
-        currentFilterActivityId = activityId
-        filteredReceipts.clear()
-        if (activityId == null) {
-            // No filter applied, show all receipts
-            filteredReceipts.addAll(allReceipts)
-        } else {
-            // Filter receipts matching the activityId
-            filteredReceipts.addAll(allReceipts.filter { it.activityId == activityId })
-        }
-        if (notify) notifyDataSetChanged()
     }
 }

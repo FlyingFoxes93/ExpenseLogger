@@ -11,7 +11,6 @@ import android.os.Environment
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import android.app.AlertDialog
@@ -30,6 +29,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import com.example.expenselogger.models.ActivityItem
+import com.example.expenselogger.Receipt
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -50,7 +50,6 @@ class MainActivity : AppCompatActivity(),
     private lateinit var tvTotalAmount: TextView
     private lateinit var rvReceipts: RecyclerView
     private val receipts: MutableList<Receipt> = mutableListOf()
-    private val filteredReceipts: MutableList<Receipt> = mutableListOf()
     private lateinit var receiptsAdapter: ReceiptsAdapter
     private var totalAmount = 0.0
     private lateinit var btnShareExpenses: Button
@@ -119,7 +118,7 @@ class MainActivity : AppCompatActivity(),
         rvActivities.layoutManager = LinearLayoutManager(this)
         rvActivities.adapter = activitiesAdapter
 
-        // Initialize ReceiptsAdapter with corrected constructor
+        // Initialize ReceiptsAdapter with empty list initially
         receiptsAdapter = ReceiptsAdapter(activitiesList, this)
         rvReceipts.layoutManager = LinearLayoutManager(this)
         rvReceipts.adapter = receiptsAdapter
@@ -206,12 +205,13 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun shareExpenses() {
+        val filteredReceipts = receiptsAdapter.getFilteredReceipts()
         if (filteredReceipts.isEmpty()) {
             Toast.makeText(this, getString(R.string.no_expenses_to_share), Toast.LENGTH_SHORT).show()
             return
         }
 
-        val expenseData = formatExpenseData()
+        val expenseData = formatExpenseData(filteredReceipts)
 
         val imageUris = ArrayList<Uri>()
         filteredReceipts.forEach { receipt ->
@@ -234,7 +234,7 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    private fun formatExpenseData(): String {
+    private fun formatExpenseData(filteredReceipts: List<Receipt>): String {
         val builder = StringBuilder()
         builder.append(getString(R.string.expense_report_header))
         builder.append("\n\n")
@@ -278,14 +278,11 @@ class MainActivity : AppCompatActivity(),
         )
         receipts.add(receipt)
 
-        if (selectedActivity != null && receipt.activityId == selectedActivity!!.id) {
-            filteredReceipts.add(receipt)
-            receiptsAdapter.addReceipt(receipt)
+        receiptsAdapter.setReceipts(receipts)
 
-            // Update total amount
-            totalAmount += amount
-            tvTotalAmount.text = getString(R.string.total_amount_label, currencySymbol, totalAmount)
-        }
+        // Update total amount based on filtered receipts
+        updateTotalAmount()
+
         // Clear the amount input
         etAmount.text.clear()
 
@@ -293,6 +290,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun updateEmptyView() {
+        val filteredReceipts = receiptsAdapter.getFilteredReceipts()
         if (filteredReceipts.isEmpty()) {
             rvReceipts.visibility = View.GONE
             tvEmptyMessage.visibility = View.VISIBLE
@@ -316,13 +314,19 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun loadActivities() {
-        // Add default activity
-        activitiesList.add(ActivityItem(DEFAULT_ACTIVITY_ID, "Uncategorised"))
+        // Add default activity if not already present
+        if (activitiesList.none { it.id == DEFAULT_ACTIVITY_ID }) {
+            activitiesList.add(ActivityItem(DEFAULT_ACTIVITY_ID, "Uncategorised"))
+        }
 
-        // Add other activities
+        // Add other activities (this can be replaced with dynamic loading)
         activitiesList.add(ActivityItem(1, "Work"))
         activitiesList.add(ActivityItem(2, "Personal"))
         activitiesAdapter.notifyDataSetChanged()
+
+        // Set default selected activity
+        selectedActivity = activitiesList.find { it.id == DEFAULT_ACTIVITY_ID }
+        tvSelectedActivity.text = getString(R.string.activity, selectedActivity?.name ?: "Uncategorised")
     }
 
     private fun showAddActivityDialog() {
@@ -355,31 +359,18 @@ class MainActivity : AppCompatActivity(),
 
     private fun loadReceipts() {
         // Initially, display all receipts
-        filteredReceipts.clear()
-        filteredReceipts.addAll(receipts)
-        receiptsAdapter.filterByActivity(null)
+        receiptsAdapter.setReceipts(receipts)
 
-        // Update total amount
+        // Update total amount based on filtered receipts
         updateTotalAmount()
         updateEmptyView()
     }
 
     private fun updateTotalAmount() {
         val currencySymbol = getString(R.string.currency_symbol)
+        val filteredReceipts = receiptsAdapter.getFilteredReceipts()
         totalAmount = filteredReceipts.sumOf { it.amount }
         tvTotalAmount.text = getString(R.string.total_amount_label, currencySymbol, totalAmount)
-    }
-
-    private fun filterReceiptsByActivity(activityId: Int) {
-        filteredReceipts.clear()
-        filteredReceipts.addAll(receipts.filter { it.activityId == activityId })
-        receiptsAdapter.filterByActivity(activityId)
-
-        // Update total amount
-        updateTotalAmount()
-
-        // Update the empty view
-        updateEmptyView()
     }
 
     private fun filterActivities(query: String?) {
@@ -423,15 +414,11 @@ class MainActivity : AppCompatActivity(),
         // Remove the receipt from the master list
         receipts.remove(receipt)
 
-        // Remove the receipt from the filtered list if present
-        filteredReceipts.remove(receipt)
+        // Update the adapter
+        receiptsAdapter.setReceipts(receipts)
 
-        // Remove from adapter
-        receiptsAdapter.removeReceipt(receipt)
-
-        // Update total amount
-        totalAmount -= receipt.amount
-        tvTotalAmount.text = getString(R.string.total_amount_label, currencySymbol, totalAmount)
+        // Update total amount based on filtered receipts
+        updateTotalAmount()
 
         // Update the empty view
         updateEmptyView()
@@ -445,10 +432,18 @@ class MainActivity : AppCompatActivity(),
         drawerLayout.closeDrawers()
         tvSelectedActivity.text = getString(R.string.activity, activity.name)
         Toast.makeText(this, "Selected: ${activity.name}", Toast.LENGTH_SHORT).show()
-        filterReceiptsByActivity(activity.id)
+        receiptsAdapter.filterByActivity(activity.id)
+        // Update total amount based on filtered receipts
+        updateTotalAmount()
     }
 
     override fun onActivityDelete(activity: ActivityItem) {
+        // Prevent deletion of default activity
+        if (activity.id == DEFAULT_ACTIVITY_ID) {
+            Toast.makeText(this, "Cannot delete default activity.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         // Remove the activity from the list
         activitiesList.remove(activity)
         activitiesAdapter.notifyDataSetChanged()
@@ -457,24 +452,26 @@ class MainActivity : AppCompatActivity(),
         receipts.filter { it.activityId == activity.id }
             .forEach { it.activityId = DEFAULT_ACTIVITY_ID }
 
+        // Update the adapter with the modified receipts list
+        receiptsAdapter.setReceipts(receipts)
+
         // If the deleted activity was selected, reset to default activity
         if (selectedActivity?.id == activity.id) {
             selectedActivity = activitiesList.find { it.id == DEFAULT_ACTIVITY_ID }
             if (selectedActivity != null) {
                 tvSelectedActivity.text = getString(R.string.activity, selectedActivity!!.name)
                 Toast.makeText(this, "Activity deleted. Default activity selected.", Toast.LENGTH_SHORT).show()
-                filterReceiptsByActivity(selectedActivity!!.id)
+                receiptsAdapter.filterByActivity(selectedActivity!!.id)
             } else {
                 // Handle case where default activity is not present
                 selectedActivity = null
-                tvSelectedActivity.text = getString(R.string.activity, "Uncategorized")
-                filterReceiptsByActivity(DEFAULT_ACTIVITY_ID)
+                tvSelectedActivity.text = getString(R.string.activity, "Uncategorised")
+                receiptsAdapter.filterByActivity(DEFAULT_ACTIVITY_ID)
             }
-        } else {
-            // Refresh receipts display
-            receiptsAdapter.updateReceipts(filteredReceipts)
-            updateTotalAmount()
         }
+
+        // Update total amount based on filtered receipts
+        updateTotalAmount()
 
         Toast.makeText(this, "Activity deleted successfully.", Toast.LENGTH_SHORT).show()
     }
