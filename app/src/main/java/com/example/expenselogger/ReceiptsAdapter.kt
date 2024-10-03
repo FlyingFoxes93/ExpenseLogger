@@ -1,5 +1,7 @@
+// ReceiptsAdapter.kt
 package com.example.expenselogger
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,14 +13,16 @@ import com.bumptech.glide.Glide
 import com.example.expenselogger.models.ActivityItem
 
 interface OnReceiptDeleteListener {
-    fun onReceiptDelete(receipt: Receipt, position: Int)
+    fun onReceiptDelete(receipt: Receipt)
 }
 
 class ReceiptsAdapter(
-    private val receipts: MutableList<Receipt>,
-    private val activitiesList: List<ActivityItem>,
+    private val activitiesList: List<ActivityItem>, // List of activities for name lookup
     private val deleteListener: OnReceiptDeleteListener
 ) : RecyclerView.Adapter<ReceiptsAdapter.ReceiptViewHolder>() {
+
+    // Internal list of receipts to display
+    private val receipts: MutableList<Receipt> = mutableListOf()
 
     class ReceiptViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val ivReceipt: ImageView = itemView.findViewById(R.id.ivReceipt)
@@ -43,9 +47,9 @@ class ReceiptsAdapter(
         holder.tvAmount.text = amountText
         holder.tvTimestamp.text = receipt.timestamp
 
-        // Load the image
+        // Load the image using Glide
         Glide.with(context)
-            .load(receipt.imageUri)
+            .load(Uri.parse(receipt.imageUri)) // Ensure imageUri is a valid URI
             .into(holder.ivReceipt)
 
         val activityName = getActivityNameById(receipt.activityId)
@@ -53,11 +57,7 @@ class ReceiptsAdapter(
 
         // Set onClickListener for delete button
         holder.btnDelete.setOnClickListener {
-            val currentPosition = holder.bindingAdapterPosition
-            if (currentPosition != RecyclerView.NO_POSITION) {
-                val currentReceipt = receipts[currentPosition]
-                deleteListener.onReceiptDelete(currentReceipt, currentPosition)
-            }
+            deleteListener.onReceiptDelete(receipt)
         }
     }
 
@@ -66,4 +66,16 @@ class ReceiptsAdapter(
     }
 
     override fun getItemCount() = receipts.size
+
+    // Method to update the adapter's data
+    fun updateReceipts(newReceipts: List<Receipt>) {
+        receipts.clear()
+        receipts.addAll(newReceipts)
+        notifyDataSetChanged()
+    }
+
+    // Optional: Method to clear filters and show all receipts
+    fun clearFilter() {
+        updateReceipts(emptyList()) // Implement as needed
+    }
 }
