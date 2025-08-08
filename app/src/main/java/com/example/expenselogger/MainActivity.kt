@@ -354,7 +354,8 @@ class MainActivity : AppCompatActivity(),
         val newId = (activitiesList.maxByOrNull { it.id }?.id ?: DEFAULT_ACTIVITY_ID) + 1
         val newActivity = ActivityItem(newId, name)
         activitiesList.add(newActivity)
-        activitiesAdapter.notifyItemInserted(activitiesList.size - 1)
+        // Update adapter with the new activity so its internal list stays in sync
+        activitiesAdapter.addActivity(newActivity)
     }
 
     private fun loadReceipts() {
@@ -444,9 +445,9 @@ class MainActivity : AppCompatActivity(),
             return
         }
 
-        // Remove the activity from the list
+        // Remove the activity from the master list and update the adapter
         activitiesList.remove(activity)
-        activitiesAdapter.notifyDataSetChanged()
+        activitiesAdapter.removeActivity(activity)
 
         // Reassign receipts to default activity
         receipts.filter { it.activityId == activity.id }

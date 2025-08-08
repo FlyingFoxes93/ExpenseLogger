@@ -13,10 +13,15 @@ import com.example.expenselogger.R
 import com.example.expenselogger.models.ActivityItem
 
 class ActivitiesAdapter(
-    private var activities: MutableList<ActivityItem>,
+    initialActivities: MutableList<ActivityItem>,
     private val listener: OnActivityClickListener,
     private val activityDeleteListener: OnActivityDeleteListener
 ) : RecyclerView.Adapter<ActivitiesAdapter.ActivityViewHolder>() {
+
+    // Maintain an internal copy of the activities list so that external
+    // modifications (like search filters) don't accidentally clear the
+    // master list held by the activity.
+    private val activities: MutableList<ActivityItem> = initialActivities.toMutableList()
 
     interface OnActivityClickListener {
         fun onActivitySelected(activity: ActivityItem)
